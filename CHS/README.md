@@ -31,21 +31,44 @@ conda install tomoatt pytomoatt
 conda activate tomoatt_conda
 ```
 
-测试 TomoATT 版本：
+测试 TomoATT 的安装情况：
 
 ```bash
-TOMOATT -v
+TOMOATT
 ```
-
-测试 PyTomoATT 的安装情况：
+若输出
+```bash
+usage: mpirun -np 4 TOMOATT -i input_params.yaml
+Error: input parameter file not found
+```
+则表示正常安装。测试 PyTomoATT 的安装情况：
 
 ```bash
 pta -h
 ```
+若输出
+```bash
+usage: pta <command> [<args>]
+...
+```
+则表示正常安装。
 
 ### 第一步：走时数据处理
 
-获得可靠走时数据是可靠反演的基础。该示例提供 5 个走时处理脚本，旨在保留研究区域内的可靠数据，删除研究区域外以及相对不可靠的数据。具体步骤包括：
+获得可靠走时数据是可靠反演的基础。进入目录`Step1_Data_Process`
+```bash
+cd Step1_Data_Process
+```
+该目录中提供了 5 个走时处理脚本，旨在保留研究区域内的可靠数据，删除研究区域外以及相对不可靠的数据。具体步骤包括：
+
+#### 预备工作：解压数据文件
+
+解压 `traveltime_data/src_rec_Turkey.tar.gz` 压缩文件，获得原始走时数据文件。
+```bash
+cd traveltime_data
+tar -xf src_rec_Turkey.tar.gz
+cd ..
+```
 
 #### 1. 确定研究区域，并删除研究区域之外的地震
 
