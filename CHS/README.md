@@ -59,58 +59,87 @@ usage: pta <command> [<args>]
 ```bash
 cd Step1_Data_Process
 ```
-该目录中提供了 5 个走时处理脚本，旨在保留研究区域内的可靠数据，删除研究区域外以及相对不可靠的数据。具体步骤包括：
+该目录中提供了 5 个走时处理脚本，旨在保留研究区域内的可靠数据，删除研究区域外以及相对不可靠的数据。处理后的阶段文件均存储于 `output_data` 中
+相关绘图存储于 `figs` 中。
+
+具体步骤包括：
 
 #### 预备工作：解压数据文件
 
-解压 `traveltime_data/src_rec_Turkey.tar.gz` 压缩文件，获得原始走时数据文件。
+解压 `traveltime_data/src_rec_Turkey.tar.gz` 压缩文件，获得原始走时数据文件 `traveltime_data/src_rec_Turkey.dat`。
 ```bash
 cd traveltime_data
 tar -xf src_rec_Turkey.tar.gz
 cd ..
 ```
+该数据文件`traveltime_data/src_rec_Turkey.dat`符合 TomoATT 数据文件格式。接下来，将对其中的数据进行筛选，以用于后续成像。
+
 
 #### 1. 确定研究区域，并删除研究区域之外的地震
 
-涉及脚本：
+涉及脚本与数据文件：
 
 - `DataProc1_删除研究区域外的数据.ipynb`
+- `traveltime_data/src_rec_Turkey.dat`
 
-该脚本用于确定研究区域，并删除研究区域之外的地震与台站。根据需要，研究区域可以进行旋转。
+该脚本用于确定研究区域，并删除研究区域之外的地震与台站。根据需要，研究区域可以进行旋转。输出文件
+
+- 旋转区域后的数据文件 `output_data/step1_src_rec_indom.dat`
+- 原始区域的地震列表 `output_data/step1_ev_list.dat`
+- 原始区域的台站列表 `output_data/step1_st_list.dat`
+- 原始区域的数据文件 `output_data/step1_src_rec_data_norot.dat`
 
 #### 2. 使用线性回归，删除残差较大的数据
 
-涉及脚本：
+涉及脚本与数据文件：
 
 - `DataProc2_使用线性回归保留可靠数据.ipynb`
+- `output_data/step1_src_rec_indom.dat`
 
-该脚本绘制震源距-首达走时散点图，并使用线性回归的方式删除误差较大的走时数据。
+该脚本绘制震源距-首达走时散点图，并使用线性回归的方式删除误差较大的走时数据。输出文件
+
+- 筛选之后的数据文件 `output_data/step2_src_rec_remove_outlier.dat`
 
 #### 3. 删除到时数量较少的地震
 
-涉及脚本：
+涉及脚本与数据文件：
 
 - `DataProc3_删除少于指定数量数据的地震.ipynb`
+- `output_data/step2_src_rec_remove_outlier.dat`
 
-该脚本可用于删除到时少于特定数量的地震数据。当走时数据较少时，其震源参数难以准确约束，因此可删除。若用户对震源信息有把握，可以不进行删除。
+该脚本可用于删除到时少于特定数量的地震数据。当走时数据较少时，其震源参数难以准确约束，因此可删除。输出文件
+
+- 筛选之后的数据文件 `output_data/step3_src_rec_filtered.dat`
+
+若用户对震源信息有把握，可以不进行删除。
 
 #### 4. 基于绝对走时数据，生成差分到时
 
-涉及脚本：
+涉及脚本与数据文件：
 
 - `DataProc4_生成差分到时.ipynb`
+- `output_data/step3_src_rec_filtered.dat`
 
-该脚本可以基于绝对到时数据，按照一定的筛选原则生成共源差分到时数据或共台差分到时数据。
+该脚本可以基于绝对到时数据，按照一定的筛选原则生成共源差分到时数据或共台差分到时数据。输出文件
+
+- 加入共源差分数据的文件 `output_data/step4_src_rec_cs.dat`
 
 其中，共源差分到时对震源不确定性不敏感，可用于提高成像可靠性；共台差分到时对台站附近结构不敏感，可用于提高震源相对定位精度以及提高震源附近结构成像分辨率。需要注意的是，共台差分到时更易受到震源不确定性影响，使用该数据需要尽量保证震源信息准确。
 
+到该步骤之后，数据已经处理完备，将处理好的数据备份一份，储存于 `CHS/Step2_ckb_tests/1_src_rec_files/src_rec_file.dat` 用于后续反演。
+
 #### 5. 可选：给地震与台站赋予权重
 
-涉及脚本：
+涉及脚本与数据文件：
 
 - `DataProc5_可选_设置数据权重.ipynb`
+- `output_data/step4_src_rec_cs.dat`
 
-该脚本可用于给地震与台站赋予权重，在数据分布不均匀的情况下，提升反演收敛速度，缩短收敛所需迭代次数。
+该脚本可用于给地震与台站赋予权重，在数据分布不均匀的情况下，提升反演收敛速度，缩短收敛所需迭代次数。输出文件
+
+- 赋予权重的数据文件 `output_data/step5_src_rec_weight.dat`
+- 地震权重文件 `step5_ev_list_weight.dat`
+- 台站权重文件 `step5_st_list_weight.dat`
 
 该示例反演流程没有添加数据权重，用户可根据实际需要进行添加。
 
