@@ -17,21 +17,18 @@
 conda create -n tomoatt_conda
 ```
 
-创建新的 conda 环境。然后使用 conda 进行 TomoATT 和 PyTomoATT 的快捷安装：
+创建新的 conda 环境。然后切换到 conda 环境 并进行 TomoATT 和 PyTomoATT 的快捷安装：
 
 ```bash
-conda install tomoatt pytomoatt
+conda activate tomoatt_conda
+mamba install tomoatt pytomoatt
 ```
 
 其中，TomoATT 是基于 C++ 语言开发的成像软件，官网链接为 [https://tomoatt.com](https://tomoatt.com)。PyTomoATT 是 Python 模组，用于处理 TomoATT 的输入和输出文件，官网链接为 [PyTomoATT 文档](https://tomoatt.github.io/PyTomoATT/index.html)。
 
-安装完成之后，可以切换到 conda 环境：
+注释：如果 mamba 命令不可用。可以先使用 `conda install -c conda-forge mamba` 安装 mamba。或者直接使用 `conda install tomoatt pytomoatt`进行安装（可能等待时间会比较长）。
 
-```bash
-conda activate tomoatt_conda
-```
-
-测试 TomoATT 的安装情况：
+安装完成之后，测试 TomoATT 的安装情况：
 
 ```bash
 TOMOATT
@@ -55,7 +52,7 @@ usage: pta <command> [<args>]
 
 ### 第一步：走时数据处理
 
-获得可靠走时数据是可靠反演的基础。进入目录`Step1_Data_Process`
+获得可靠走时数据是可靠反演的基础。进入数据处理目录`Step1_Data_Process`
 ```bash
 cd Step1_Data_Process
 ```
@@ -126,7 +123,7 @@ cd ..
 
 其中，共源差分到时对震源不确定性不敏感，可用于提高成像可靠性；共台差分到时对台站附近结构不敏感，可用于提高震源相对定位精度以及提高震源附近结构成像分辨率。需要注意的是，共台差分到时更易受到震源不确定性影响，使用该数据需要尽量保证震源信息准确。
 
-到该步骤之后，数据已经处理完备，将处理好的数据备份一份，储存于 `CHS/Step2_ckb_tests/1_src_rec_files/src_rec_file.dat` 用于后续反演。
+到该步骤之后，数据已经处理完备，将处理好的数据备份一份，储存于 `CHS/1_src_rec_files/src_rec_file.dat` 用于后续反演。
 
 #### 5. 可选：给地震与台站赋予权重
 
@@ -143,69 +140,120 @@ cd ..
 
 该示例反演流程没有添加数据权重，用户可根据实际需要进行添加。
 
+#### 6. 数据文件处理部分结束
+
+退出到主目录 `PATH/CHS`
+```bash
+cd ..
+```
+
 ### 第二步：构建反演初始模型
 
-TomoATT 使用迭代法更新模型，因此反演需要提供合适的初始模型。这里提供基于 Crust 1.0 模型生成一维层状模型的脚本。
+TomoATT 使用迭代法更新模型，因此反演需要提供合适的初始模型。
+
+进入初始模型构造目录 `Step2_Initial_Model`
+```bash
+cd Step2_Initial_Model
+```
+
+这里提供基于 Crust 1.0 模型生成一维层状模型的脚本。
 
 涉及脚本：
 
 - `ModelProc1_生成初始一维模型.ipynb`
 
-该脚本基于 Crust 1.0 模型生成一维模型。每个深度的速度取当前研究区域中 Crust 1.0 模型的平均速度。
+该脚本会读取 TomoATT 参数文件 `../3_input_params/input_params_step1_1D_inv.yaml` 中的主要是正演网格参数，基于 Crust 1.0 模型生成一维模型。每个深度的速度取当前研究区域中 Crust 1.0 模型的平均速度。
+
+输出模型文件
+
+- `output_model/model_1d_crust1.0_N31_61_31.h5`
+
+同时，该模型文件也备份了一份到主目录 `PATH/CHS/2_models/model_1d_crust1.0_N31_61_31.h5`
+
+模型文件是 HDF5 格式，可以在命令行使用指令 h5ls 简单查看该文件中的内容，例如使用
+```bash
+h5ls output_model/model_1d_crust1.0_N31_61_31.h5
+```
+输出为
+```bash
+eta                      Dataset {31, 61, 31}
+vel                      Dataset {31, 61, 31}
+xi                       Dataset {31, 61, 31}
+zeta                     Dataset {31, 61, 31}
+```
+其中 vel 表示速度，是三维数组，表示三维正演网格点上的速度值。深度方向（第一维）包括31个网格点，纬度方向（第二维）包括61个网格点，经度方向（第三维）包括31个网格点。 类似的三维数组 xi, eta 表示方位角各向异性参数。zeta 目前暂时未实装。
 
 另外，用户可根据需求参考更丰富的模型生成脚本，生成符合自己研究需求的模型。参考链接：[TomoATT HDF5 模型生成脚本](https://tomoatt.com/docs/Tools/scripts_of_generate_hdf5_model/introduction)。
 
-### 第三步：开展反演
+模型生成完毕后，退出到主目录 `PATH/CHS`
+```bash
+cd ..
+```
 
-#### 1. 一维模型反演
 
-该成像步骤旨在获得合适的初始模型用于地震层析成像。这里“合适的模型”的具体含义是：在该模型下，理论走时和观测走时的残差均值应该在 0 附近，例如其绝对值小于 0.1 秒。
+### 第三步：初始一维模型反演
+
+在第二步中，我们初步构建了适用于 TomoATT 程序的模型文件，然而，该模型可能并不合适。这里“合适的模型”的具体含义是：在该模型下，理论走时和观测走时的残差均值应该在 0 附近，例如其绝对值小于 0.1 秒。
 
 只有走时残差均值在 0 附近，其模型整体速度才没有偏高或者偏低。否则，在后续迭代中，程序会优先恢复速度均值，导致成像结果相对初始模型的扰动整体为正值或负值。不能说这种整体偏高或者偏低的初始模型无法得到好的成像结果，而是会增加反演收敛到局部极小的风险。
 
-地震层析成像本身是一个病态问题，其反演问题通常是多解的。因此，一个合适的模型有助于收敛到更加符合实际的模型。我们需要保证初始模型能够尽量满足走时残差均值在 0 附近。
+地震层析成像本身是一个病态问题，其反演问题通常是多解的，一个合适的模型有助于收敛到更加符合实际的模型。因此，该步骤旨在获得合适的初始模型用于地震层析成像，保证初始模型能够尽量满足走时残差均值在 0 附近。
 
-注释：在一些测试中，我们发现成像结果对初始模型依赖并不强，差异较大的初始模型仍然能够得到一致的反演结果。这种情况通常对地震数据质量和分布有较高要求。
+注释：
 
-涉及文件：
+1. 速度模型和地震位置都会影响走时残差，两者相互耦合。在通常我们需要倾向于相信其中一个。例如这里我们倾向于相信震源位置，因此需要更新初始模型，使走时残差更新到0附近。若初始构造模型时来源于一个可靠性较高的区域模型，可以倾向于相信模型，从而进行震源初步重定位，使走时残差更新到0附近。
 
-- `Inversion1_一维模型反演.sh`
+2. 在一些测试中，我们发现同样成像结果对初始模型依赖并不强，差异较大的初始模型仍然能够得到一致的反演结果。这种情况通常对地震数据质量和分布有较高要求。
 
 在命令行中使用以下命令，通过 TomoATT 进行一维速度模型反演：
 
 ```bash
-bash Inversion1_一维模型反演.sh
+bash Step3_bash_一维模型反演.sh
 ```
 
 该反演使用以下文件：
 
-- 数据文件：`1_src_rec_files/src_rec_file.dat`
-- 模型文件：`2_models/model_1d_crust1.0_N31_61_31.h5`
-- 参数文件：`3_input_params/input_params_step1_1D_inv.yaml`
+- 数据文件：`./1_src_rec_files/src_rec_file.dat`
+- 模型文件：`./2_models/model_1d_crust1.0_N31_61_31.h5`
+- 参数文件：`./3_input_params/input_params_step1_1D_inv.yaml`
 
 反演结果存储在目录 `OUTPUT_FILES/OUTPUT_FILES_step1_1D_inv` 中，重要的输出文件包括：
 
 - 最终模型文件：`OUTPUT_FILES/OUTPUT_FILES_step1_1D_inv/final_model.h5`
 - 目标函数下降情况：`OUTPUT_FILES/OUTPUT_FILES_step1_1D_inv/objective_function.txt`
 
-可使用 `Plot1_画一维模型反演结果.ipynb` 画图展示反演前后的一维模型，以及目标函数下降情况。
+输出的模型文件也备份了一份到 `2_models/model_1d_after_1d_inv.h5`
 
-#### 2. 开展检测板测试
+可使用 `Plot1_画一维模型反演结果.ipynb` 画图展示反演前后的一维模型。图片输出到 `figs/model_inv_1d.png`
+
+
+### 第四步：开展检测板测试
 
 设计检测板测试旨在评估当前地震数据对速度结构与各向异性的分辨能力。
 
-涉及文件：
+#### 1. 构造检测板模型
 
-- 检测板模型生成脚本：`ModelProc2_生成检测板模型.ipynb`
-- 合成数据添加噪声脚本：`DataProc6_ckb_add_noise.py`
-- 检测板测试脚本：`Inversion2_检测板测试.sh`
-
-首先，使用 `ModelProc2_生成检测板模型.ipynb`，基于反演得到的一维模型文件 `OUTPUT_FILES/OUTPUT_FILES_step1_1D_inv/final_model.h5` 添加高低速异常以及各向异性异常，构建检测板模型。
-
-之后，在命令行中使用以下命令开展检测板测试：
-
+首先需要构造检测板模型。进入目录 `Step4_ckb_model`
 ```bash
-bash Inversion2_检测板测试.sh
+cd Step4_ckb_model
+```
+
+使用 `ModelProc2_生成检测板模型.ipynb`，基于反演得到的一维模型文件 `OUTPUT_FILES/OUTPUT_FILES_step1_1D_inv/final_model.h5` 添加高低速异常以及各向异性异常，构建检测板模型。
+
+模型文件存储到 `output_model/model_ckb_N31_61_31.h5`，同时备份到主目录 `PATH/CHS/2_models/model_ckb_N31_61_31.h5`
+
+检测板模型图像储存为 `figs/ModelProc2_ckb_model.png`
+
+退出到主目录 `PATH/CHS`
+```bash
+cd ..
+```
+
+#### 2. 检测板测试
+
+在命令行中使用以下命令，执行检测板测试
+```bash
+bash Step4_bash_检测板测试.sh
 ```
 
 检测板测试包括三项步骤：
@@ -232,7 +280,9 @@ bash Inversion2_检测板测试.sh
 
 - 添加噪声的数据文件：`OUTPUT_FILES/OUTPUT_FILES_ckb_signal/src_rec_file_forward_noisy.dat`
 
-##### 第三步：开展检测板反演测试
+注释：这里默认给观测绝对走时添加了 均值为0，标准差为0.1秒的高斯噪声。差分走时仍然由绝对走时相减得到。这里默认的0.1秒认为是手挑到时的误差范围。具体噪声强度可根据实际情况进行选择。
+
+##### 第三步：使用添加噪声后的走时数据进行反演
 
 从没有异常的初始模型出发，尝试恢复检测板异常体。该反演使用以下文件：
 
@@ -240,17 +290,13 @@ bash Inversion2_检测板测试.sh
 - 模型文件：`OUTPUT_FILES/OUTPUT_FILES_step1_1D_inv/final_model.h5`
 - 参数文件：`3_input_params/input_params_ckb_inv.yaml`
 
-反演结果存储在目录 `OUTPUT_FILES/OUTPUT_FILES_ckb_inv` 中，重要的输出文件包括：
+该示例仅进行10次迭代，用于示例，因此异常体恢复效果一般。反演结果存储在目录 `OUTPUT_FILES/OUTPUT_FILES_ckb_inv` 中，重要的输出文件包括：
 
 - 最终模型文件：`OUTPUT_FILES/OUTPUT_FILES_ckb_inv/final_model.h5`
 - 目标函数下降情况：`OUTPUT_FILES/OUTPUT_FILES_ckb_inv/objective_function.txt`
 
-可使用 `Plot2_画检测板测试结果.ipynb` 画图展示检测板测试结果，以及目标函数下降情况。
+若要进行完整80次迭代，可使用参数文件 `3_input_params/input_params_ckb_inv_80iter.yaml`，异常体恢复效果更好。反演结果将会储存在 `OUTPUT_FILES/OUTPUT_FILES_ckb_inv_80iter`
+为了进行验证，80次迭代模型打包在目录 `PATH/CHS/benchmark_dataset/OUTPUT_FILES_ckb_inv_80iter.tar.gz` 中
 
-#### 3. 真实数据反演
+可使用 `Plot2_画检测板测试结果.ipynb` 画图展示检测板测试结果。
 
-通过多次设计检测板，评估完数据的分辨能力之后，可以选择合适的反演网格尺寸，进行真实数据反演。
-
-该反演包括两项流程：地震重定位，以及结构与震源联合反演。
-
-第一步，地震重定位。
