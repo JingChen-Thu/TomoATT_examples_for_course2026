@@ -1,7 +1,7 @@
 # 检测板测试
 
 # 如果使用源码安装的方式，TomoATT_path 需要指向生成的可执行文件 build/bin/TOMOATT 的路径
-TomoATT_path=./bin/TOMOATT
+TomoATT_path=TOMOATT
 # 若使用 Conda 安装的方式，则直接使用 TOMOATT 即可
 # TomoATT_path=TOMOATT
 
