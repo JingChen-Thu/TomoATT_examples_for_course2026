@@ -363,7 +363,7 @@ mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_ckb_signal.yam
 使用命令：
 
 ```bash
-mpirun -n ${Nproc} --allow-run-as-root --oversubscribe ${TomoATT_path} -i 3_input_params/input_params_ckb_inv.yaml
+mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_ckb_inv.yaml
 ```
 
 该示例仅进行 10 次迭代，用于示例，因此异常体恢复效果一般。反演结果存储在目录 `OUTPUT_FILES/OUTPUT_FILES_ckb_inv` 中，重要的输出文件包括：
@@ -400,7 +400,7 @@ bash Step5_bash_真实数据成像.sh
 使用命令：
 
 ```bash
-mpirun -n ${Nproc} --allow-run-as-root --oversubscribe ${TomoATT_path} -i 3_input_params/input_params_step2_reloc.yaml
+mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step2_reloc.yaml
 ```
 
 使用迭代法更新震源位置与发震时刻，进行 30 次迭代。反演结果存储在目录 `OUTPUT_FILES/OUTPUT_FILES_step2_reloc` 中，重要的输出文件包括：
@@ -425,15 +425,23 @@ mpirun -n ${Nproc} --allow-run-as-root --oversubscribe ${TomoATT_path} -i 3_inpu
 使用命令：
 
 ```bash
-mpirun -n ${Nproc} --allow-run-as-root --oversubscribe ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc.yaml
+mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc.yaml
 ```
 
-在第 `k` 步迭代结果中，计算目标函数关于速度结构、各向异性、震源位置与发震时刻的梯度，同时更新以上参数，得到第 `k + 1` 步迭代结果。总计进行 100 次迭代。
+该示例仅进行 10 次迭代，用于示例，因此异常体恢复效果一般。反演结果存储在目录 `OUTPUT_FILES/OUTPUT_FILES_step3_inv_reloc` 中，重要的输出文件包括：
 
-注释：
+- 最终模型文件：`OUTPUT_FILES/OUTPUT_FILES_step3_inv_reloc/final_model.h5`
+- 目标函数下降情况：`OUTPUT_FILES/OUTPUT_FILES_step3_inv_reloc/objective_function.txt`
 
-1. 默认采用最速下降法更新速度结构与各向异性，其梯度会归一化，并在每步迭代中使用最大下降步长进行控制。默认的初始步长是 2% 的扰动量。
-2. 地震定位也采用最速下降法，更新每个震源的位置与发震时刻。其梯度同样会归一化，并使用独立于结构的最大下降步长进行控制。默认是每次最大变化 `0.05 km / 0.05 km / 0.05 km / 0.008 s`。
-3. 在地震重定位之后，仍然需要在结构更新时同步更新震源。这是因为之前地震重定位得到的是层状模型下的合适震源位置。但是当成像迭代中模型发生更新时，震源不再是合适的震源位置，需要随着模型更新而变化。同时，考虑到每步迭代的模型变化量并不大，因此每步迭代的震源位置更新量同样采用了较为保守的数值。
+若要进行完整 100 次迭代，可使用参数文件 `3_input_params/input_params_step3_inv_reloc_100iter.yaml`，异常体恢复效果更好。反演结果将会存储在 `OUTPUT_FILES/OUTPUT_FILES_step3_inv_reloc_100iter` 中。
+
+为了进行验证，100 次迭代模型打包在目录 `PATH/CHS/benchmark_dataset/OUTPUT_FILES_step3_inv_reloc_100iter/final_model.h5` 中。
 
 可使用 `Plot3_真实数据反演结果.ipynb` 画图展示真实数据层析成像结果。
+
+注释：
+1. TomoATT 使用迭代法更新参数：在第 `k` 步迭代结果中，计算目标函数关于速度结构、各向异性、震源位置与发震时刻的梯度，同时更新以上参数，得到第 `k + 1` 步迭代结果。总计进行 100 次迭代。
+2. 默认采用最速下降法更新速度结构与各向异性，其梯度会归一化，并在每步迭代中使用最大下降步长进行控制。默认的初始步长是 2% 的扰动量。
+3. 地震定位也采用最速下降法，更新每个震源的位置与发震时刻。其梯度同样会归一化，并使用独立于结构的最大下降步长进行控制。默认是每次最大变化 `0.05 km / 0.05 km / 0.05 km / 0.008 s`。
+4. 在地震重定位之后，仍然需要在结构更新时同步更新震源。这是因为之前地震重定位得到的是层状模型下的合适震源位置。但是当成像迭代中模型发生更新时，震源不再是合适的震源位置，需要随着模型更新而变化。同时，考虑到每步迭代的模型变化量并不大，因此每步迭代的震源位置更新量同样采用了较为保守的数值。
+

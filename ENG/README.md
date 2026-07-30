@@ -359,7 +359,7 @@ Starting from the anomaly-free initial model, invert the noisy data to recover t
 The corresponding TomoATT command is:
 
 ```bash
-mpirun -n ${Nproc} --allow-run-as-root --oversubscribe ${TomoATT_path} -i 3_input_params/input_params_ckb_inv.yaml
+mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_ckb_inv.yaml
 ```
 
 This tutorial example runs only 10 iterations, so the anomaly recovery is limited. Results are stored in `OUTPUT_FILES/OUTPUT_FILES_ckb_inv`. Important outputs include:
@@ -396,7 +396,7 @@ To reduce the influence of initial source errors on the imaging result, first up
 The corresponding TomoATT command is:
 
 ```bash
-mpirun -n ${Nproc} --allow-run-as-root --oversubscribe ${TomoATT_path} -i 3_input_params/input_params_step2_reloc.yaml
+mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step2_reloc.yaml
 ```
 
 This step updates earthquake locations and origin times for 30 iterations. Results are stored in `OUTPUT_FILES/OUTPUT_FILES_step2_reloc`. Important outputs include:
@@ -421,7 +421,7 @@ Finally, jointly invert for velocity structure, azimuthal anisotropy, and source
 The corresponding TomoATT command is:
 
 ```bash
-mpirun -n ${Nproc} --allow-run-as-root --oversubscribe ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc.yaml
+mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc.yaml
 ```
 
 At iteration `k`, TomoATT computes the gradients of the objective function with respect to velocity, anisotropy, earthquake location, and origin time, then updates these parameters to obtain iteration `k + 1`. The full run uses 100 iterations.
