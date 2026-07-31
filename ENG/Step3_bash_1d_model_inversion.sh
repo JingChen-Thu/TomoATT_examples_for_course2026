@@ -2,7 +2,7 @@
 
 # If TomoATT was built from source, TomoATT_path should point to the generated
 # executable, usually build/bin/TOMOATT.
-# TomoATT_path=../../build/bin/TOMOATT
+# TomoATT_path=./bin/TOMOATT
 
 # If TomoATT was installed with Conda, TOMOATT is usually available directly.
 TomoATT_path=TOMOATT

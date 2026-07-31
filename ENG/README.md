@@ -290,7 +290,7 @@ cd Step4_ckb_model
 
 Use `ModelProc2_generate_checkerboard_model.ipynb` to add positive and negative velocity anomalies and anisotropy anomalies to the 1-D model obtained from `OUTPUT_FILES/OUTPUT_FILES_step1_1D_inv/final_model.h5`.
 
-The velocity anomaly size is 1 degree × 1 degree × 10 km, and the anisotropy anomaly size is 1.5 degrees × 1.5 degrees × 10 km. The corresponding inversion-grid spacing in the parameter files is 0.5 degrees × 0.5 degrees × 5 km for velocity and 0.75 degrees × 0.75 degrees × 5 km for anisotropy.
+The velocity anomaly size is 1 degree x 1 degree x 10 km, and the anisotropy anomaly size is 1.5 degrees x 1.5 degrees x 10 km. The corresponding inversion-grid spacing in the parameter files is 0.5 degrees x 0.5 degrees x 5 km for velocity and 0.75 degrees x 0.75 degrees x 5 km for anisotropy.
 
 The inversion grid is one of the core settings in tomography and depends strongly on checkerboard-test results. A few notes:
 
@@ -424,12 +424,20 @@ The corresponding TomoATT command is:
 mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc.yaml
 ```
 
-At iteration `k`, TomoATT computes the gradients of the objective function with respect to velocity, anisotropy, earthquake location, and origin time, then updates these parameters to obtain iteration `k + 1`. The full run uses 100 iterations.
+This tutorial example runs only 10 iterations, so the recovered anomalies are limited. Results are stored in `OUTPUT_FILES/OUTPUT_FILES_step3_inv_reloc`. Important outputs include:
+
+- Final model file: `OUTPUT_FILES/OUTPUT_FILES_step3_inv_reloc/final_model.h5`
+- Objective-function history: `OUTPUT_FILES/OUTPUT_FILES_step3_inv_reloc/objective_function.txt`
+
+For a more complete 100-iteration run, use `3_input_params/input_params_step3_inv_reloc_100iter.yaml`. Results will be stored in `OUTPUT_FILES/OUTPUT_FILES_step3_inv_reloc_100iter`.
+
+For validation, the 100-iteration final model is provided at `PATH/ENG/benchmark_dataset/OUTPUT_FILES_step3_inv_reloc_100iter/final_model.h5`.
+
+Use `Plot3_plot_real_data_inversion_results.ipynb` to plot the real-data tomography results.
 
 Notes:
 
-1. Velocity and anisotropy are updated with the steepest-descent method by default. Their gradients are normalized, and the maximum update step is controlled at each iteration. The default initial step length corresponds to a 2% perturbation.
-2. Earthquake relocation also uses steepest descent to update each source location and origin time. Its gradients are normalized and controlled by maximum update steps independent of the structural parameters. The default maximum update is `0.05 km / 0.05 km / 0.05 km / 0.008 s` per iteration.
-3. After preliminary relocation, sources still need to be updated during structural inversion. The relocated sources are suitable for the layered model, but once the structure changes during inversion, the source parameters also need to change. Because the model update is small at each iteration, conservative source-update steps are used.
-
-Use `Plot3_plot_real_data_inversion_results.ipynb` to plot the real-data tomography results.
+1. TomoATT updates parameters iteratively. At iteration `k`, it computes the gradients of the objective function with respect to velocity structure, azimuthal anisotropy, earthquake location, and origin time, then updates these parameters to obtain iteration `k + 1`. The full run uses 100 iterations.
+2. Velocity and anisotropy are updated with the steepest-descent method by default. Their gradients are normalized, and the maximum update step is controlled at each iteration. The default initial step length corresponds to a 2% perturbation.
+3. Earthquake relocation also uses steepest descent to update each source location and origin time. Its gradients are normalized and controlled by maximum update steps independent of the structural parameters. The default maximum update is `0.05 km / 0.05 km / 0.05 km / 0.008 s` per iteration.
+4. After preliminary relocation, sources still need to be updated during structural inversion. The relocated sources are suitable for the layered model, but once the structure changes during inversion, the source parameters also need to change. Because the model update is small at each iteration, conservative source-update steps are used.

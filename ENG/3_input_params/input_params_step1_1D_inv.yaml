@@ -7,7 +7,7 @@ domain:
   min_max_dep: [-10.0, 50.0] # depth in km
   min_max_lat: [-2.5, 3.5]   # latitude in degree
   min_max_lon: [-1.5, 1.5]   # longitude in degree
-  n_rtp: [31,61,31]          # number of nodes  
+  n_rtp: [31,61,31]          # number of nodes
 
 # Note: Ideally, the forward grid spacing should be smaller than 0.05 degrees horizontally and smaller than 1 km in depth, e.g., n_rtp: [61,121,61].
 # For tests, a coarser grid such as n_rtp: [31,61,31] can be used to speed up computation.
@@ -75,16 +75,16 @@ model_update: # update model parameters (when run_mode : 1 and 3)
 
   # parameters for optim_method 0 (grad_descent)
   optim_method_0:
-    step_method: 1  # the method to modulate step size. 0: according to objective function; 1: according to gradient direction 
-    # if step_method:0. if objective function increase, step size -> step length * step_length_decay. 
+    step_method: 1  # the method to modulate step size. 0: according to objective function; 1: according to gradient direction
+    # if step_method:0. if objective function increase, step size -> step length * step_length_decay.
     step_length_decay: 0.95 # default: 0.9
-    # if step_method:1. if the angle between the current and the previous gradients is greater than step_length_gradient_angle, step size -> step length * step_length_change[0]. 
-    #                                                                                                                otherwise, step size -> step length * step_length_change[1]. 
-    step_length_gradient_angle: 120 # default: 120.0 
-    step_length_change: [0.5, 1.2] # default: [0.5,1.2] 
+    # if step_method:1. if the angle between the current and the previous gradients is greater than step_length_gradient_angle, step size -> step length * step_length_change[0].
+    #                                                                                                                otherwise, step size -> step length * step_length_change[1].
+    step_length_gradient_angle: 120 # default: 120.0
+    step_length_change: [0.5, 1.2] # default: [0.5,1.2]
     # Kdensity_coe is used to rescale the final kernel:  kernel -> kernel / pow(density of kernel, Kdensity_coe).  if Kdensity_coe > 0, the region with less data will be enhanced during the inversion
     #  e.g., if Kdensity_coe = 0, kernel remains upchanged; if Kdensity_coe = 1, kernel is fully normalized. 0.5 or less is recommended if really required.
-    Kdensity_coe: 0.5 # default: 0.0,  limited range: 0.0 - 0.95 
+    Kdensity_coe: 0.5 # default: 0.0,  limited range: 0.0 - 0.95
 
   # parameters for optim_method 1 (lbfgs)
   optim_method_1:
@@ -216,7 +216,7 @@ inversion_strategy: # update model parameters and earthquake hypocenter iterativ
   # for inv_mode : 0, parameters below are required
   inv_mode_0: # update model for <model_update_N_iter> steps, then update location for <relocation_N_iter> steps, and repeat the process for <max_loop> loops.
     model_update_N_iter: 5
-    relocation_N_iter: 5 
+    relocation_N_iter: 5
     max_loop: 8
 
 
