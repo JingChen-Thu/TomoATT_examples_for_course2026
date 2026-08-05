@@ -4,13 +4,11 @@ version: 3
 #            computational domian               #
 #################################################
 domain:
-  min_max_dep: [-10, 50] # depth in km
-  min_max_lat: [-2.5, 3.5] # latitude in degree
-  min_max_lon: [-1.5, 1.5] # longitude in degree
-  n_rtp: [31,61,31] # number of nodes in depth,latitude,longitude direction
-
-# 注释：最好能让正演网格在水平方向上小于 0.05 度，在深度方向上小于 1 km。即 n_rtp: [61,121,61]。
-# 在测试中，可以使用较粗的网格，例如 n_rtp: [31,61,31]，以加快计算速度，更快获得测试结果
+  min_max_dep: [-10, 50] # depth in km. 
+  min_max_lat: [-2.5, 3.5] # latitude in degree. 
+  min_max_lon: [-1.5, 1.5] # longitude in degree. 
+  n_rtp: [31, 61, 31] # number of nodes in depth,latitude,longitude direction. 
+  # The grid spacing should not exceed (2km, 0.10 degree, 0.10 degree) to ensure accuracy; a spacing of less than (1km, 0.05 degree, 0.05 degree) is recommended.
 
 #################################################
 #            traveltime data file path          #
@@ -24,7 +22,6 @@ source:
 #################################################
 model:
   init_model_path: OUTPUT_FILES/OUTPUT_FILES_step1_1D_inv/final_model.h5 # path to initial model file 
-#   model_1d_name: dummy_model_1d_name # 1D model name used in teleseismic 2D solver (iasp91, ak135, user_defined is available), defined in include/1d_model.h
 
 #################################################
 #            parallel computation settings      #
@@ -33,7 +30,6 @@ parallel: # parameters for parallel computation
   n_sims: 8 # number of simultanoues runs (parallel the sources)
   ndiv_rtp: [1, 1, 1] # number of subdivision on each direction (parallel the computional domain)
   nproc_sub: 1 # number of processors for sweep parallelization (parallel the fast sweep method)
-  use_gpu: false # true if use gpu (EXPERIMENTAL)
 
 ############################################
 #            output file setting           #
@@ -47,8 +43,6 @@ output_setting:
   output_in_process:       false # True: output at each inv iteration, otherwise, only output step 0, Niter-1, Niter. Default: true. File: 'out_data_sim_group_0'.
   output_in_process_data:  false # True: output src_rec_file at each inv iteration, otherwise, only output step 0, Niter-2, Niter-1. Default: true. File: 'src_rec_file_step_XXXX.dat'
   single_precision_output: false # True: output results in single precision. Default: false.   
-  verbose_output_level:    0 # output internal parameters, (to do).
-  output_file_format: 0 # 0: hdf5, 1: ascii
 
 # output files:
 # File: 'out_data_grid.h5'. Keys: ['Mesh']['elem_conn'], element index; 
@@ -120,6 +114,7 @@ model_update:
     step_method: 1  # the method to modulate step size. 0: according to objective function; 1: according to gradient direction 
     # if step_method:0. if objective function increase, step size -> step length * step_length_decay. 
     step_length_decay: 0.95 # default: 0.9
+
     # if step_method:1. if the angle between the current and the previous gradients is greater than step_length_gradient_angle, step size -> step length * step_length_change[0]. 
     #                                                                                                                otherwise, step size -> step length * step_length_change[1]. 
     step_length_gradient_angle: 120 # default: 120.0 
@@ -132,12 +127,6 @@ model_update:
   optim_method_1:
     max_sub_iterations: 20 # maximum number of each sub-iteration
 
-  # smoothing
-  smoothing:
-    smooth_method: 0 # 0: multiparametrization, 1: laplacian smoothing (EXPERIMENTAL)
-    l_smooth_rtp: [1, 9.2792e-08, 9.2792e-08] # smoothing coefficients for laplacian smoothing
-
-  # parameters for smooth method 0 (multigrid model parametrization)
   # inversion grid can be viewed in OUTPUT_FILES/inversion_grid.txt
   n_inversion_grid: 5 # number of inversion grid sets
 
@@ -154,7 +143,7 @@ model_update:
 
   # -------------- flexible inversion grid setting -------------- 
   # settings for flexible inversion grid
-  dep_inv: [-20, -10,  0,  5,  10,  15, 20, 25, 30, 42, 54, 68] # inversion grid for vel in depth (km)
+  dep_inv: [-20, -10, 0, 5, 10, 15, 20, 25, 30, 42, 54, 68] # inversion grid for vel in depth (km)
   lat_inv: [-3, -2.5, -2, -1.5, -1, -0.5, -0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4] # inversion grid for vel in latitude (degree)
   lon_inv: [-2, -1.5, -1, -0.5, -0, 0.5, 1, 1.5, 2] # inversion grid for vel in longitude (degree)
   trapezoid: [1, 0, 50]  # usually set as [1.0, 0.0, 50.0] (default)
@@ -170,7 +159,7 @@ model_update:
 
   # ---------- flexible inversion grid setting for anisotropy ----------
   # settings for flexible inversion grid for anisotropy
-  dep_inv_ani: [-20, -10,  0,  5,  10,  15, 20, 25, 30, 42, 54, 68] # inversion grid for ani in depth (km)
+  dep_inv_ani: [-20, -10, 0, 5, 10, 15, 20, 25, 30, 42, 54, 68] # inversion grid for ani in depth (km)
   lat_inv_ani: [-3.5, -2.5, -1.75, -1, -0.25, -0, 0.5, 1.25, 2, 2.75, 3.5, 4.5] # inversion grid for ani in latitude (degree)
   lon_inv_ani: [-2.5, -1.5, -0.75, -0, 0.75, 1.5, 2.5] # inversion grid for ani in longitude (degree)
   trapezoid_ani: [1, 0, 50]  # usually set as [1.0, 0.0, 50.0] (default)
@@ -206,8 +195,8 @@ model_update:
   #                            |<---- trapezoid[0]* (lon_inv[end] - lon_inv[0]) ------>|  
 
 
-  # path to station correction file (under development)
-  use_sta_correction: false
+  # station correction terms for teleseismic data
+  use_sta_correction: false # 'true' for using station correction terms; 'false' for not using. Default: false
   # initial_sta_correction_file: dummy_sta_correction_file  # the path of initial station correction 
   step_length_sta_correction: 0.001 # step length relate to the update of station correction terms
 
@@ -248,7 +237,7 @@ model_update:
   update_slowness : true # update slowness (velocity) or not.              default: true
   update_azi_ani  : true # update azimuthal anisotropy (xi, eta) or not.   default: false
 
-  # -------------- for teleseismic inversion (under development) --------------
+  # -------------- for teleseismic inversion --------------
   # depth_taper : [d1,d2] means: 
   # if       XXX < d1, kernel <- kernel * 0.0 
   # if d1 <= XXX < d2, kernel <- kernel * (XXX-d1)/(d2-d1),  (linear interpolation) 
@@ -263,12 +252,12 @@ relocation: # update earthquake hypocenter and origin time (when run_mode : 2 an
   min_Ndata: 4 # if the number of data of the earthquake is less than <min_Ndata>, the earthquake will not be relocated.  defaut value: 4 
 
   # relocation_strategy
+  # at each iteration, the maximum change of dep, lat, lon, ortime = step_length * rescaling_dep_lat_lon_ortime
   step_length : 0.01 # initial step length of relocation perturbation. 0.01 means maximum 1% perturbation for each iteration.
   step_length_decay : 0.8 # if objective function increase, step size -> step length * step_length_decay. default: 0.9
   rescaling_dep_lat_lon_ortime  : [5, 5, 5, 0.8]  # The perturbation is related to <rescaling_dep_lat_lon_ortime>. Unit: km,km,km,second
   max_change_dep_lat_lon_ortime : [5, 5, 5, 0.8]     # the change of dep,lat,lon,ortime do not exceed max_change. Unit: km,km,km,second
   max_iterations : 50 # maximum number of iterations for relocation
-  tol_gradient : 0.0001 # if the norm of gradient is smaller than the tolerance, the iteration of relocation terminates
 
   # -------------- using absolute traveltime data --------------
   abs_time:
@@ -312,12 +301,4 @@ inversion_strategy: # update model parameters and earthquake hypocenter iterativ
   # for inv_mode : 1, parameters below are required
   inv_mode_1: # update model and location simultaneously for <max_loop> loops.
     max_loop : 10
-
-# keep these setting unchanged, unless you are familiar with the eikonal solver in this code
-calculation:
-   convergence_tolerance: 1e-05 # threshold value for checking the convergence for each forward/adjoint run
-   max_iterations: 500 # number of maximum iteration for each forward/adjoint run
-   stencil_order: 1 # order of stencil, 1 or 3
-   stencil_type: 1 # 0: , 1: first-order upwind scheme (only sweep_type 0 is supported) 
-   sweep_type: 0 # 0: legacy, 1: cuthill-mckee with shm parallelization
 

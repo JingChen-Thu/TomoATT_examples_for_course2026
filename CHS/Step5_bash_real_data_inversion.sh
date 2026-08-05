@@ -15,7 +15,11 @@ mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step2_reloc.ya
 # 进行10次迭代进行示例
 mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc.yaml
 # 进行100次迭代，得到完整结果
-mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc_100iter.yaml
+# mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc_100iter.yaml
+
+
+
+
 
 # # 对于WSL系统，当用root用户运行时，需要添加 --allow-run-as-root
 # # 当Nproc大于物理核心数时，需要 --oversubscribe 
@@ -26,4 +30,4 @@ mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step3_inv_relo
 # # 进行10次迭代进行示例
 # mpirun -n ${Nproc} --allow-run-as-root --oversubscribe  ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc.yaml
 # # 进行100次迭代，得到完整结果
-# mpirun -n ${Nproc} --allow-run-as-root --oversubscribe  ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc_100iter.yaml
+# # mpirun -n ${Nproc} --allow-run-as-root --oversubscribe  ${TomoATT_path} -i 3_input_params/input_params_step3_inv_reloc_100iter.yaml
