@@ -51,19 +51,37 @@ TomoATT 程序可以引用：
 在命令行中执行：
 
 ```bash
-conda create -n tomoatt_conda
+mamba create -n tomoatt_conda
 ```
 
 创建新的 conda 环境。然后切换到 conda 环境，并进行 TomoATT 和 PyTomoATT 的快捷安装：
 
 ```bash
-conda activate tomoatt_conda
+mamba activate tomoatt_conda
 mamba install tomoatt pytomoatt
 ```
 
 其中，TomoATT 是基于 C++ 语言开发的成像软件，官网链接为 [https://tomoatt.com](https://tomoatt.com)。PyTomoATT 是 Python 模组，用于处理 TomoATT 的输入和输出文件，官网链接为 [PyTomoATT 文档](https://tomoatt.github.io/PyTomoATT/index.html)。
 
-注释：如果 `mamba` 命令不可用，可以先使用 `conda install -c conda-forge mamba` 安装 `mamba`，或者直接使用 `conda install tomoatt pytomoatt` 进行安装，但等待时间可能会比较长。
+注释：
+
+1. 如果没有 `mamba` 命令，WSL或Linux 可以按照如下方式安装 miniforge:
+```bash
+wget https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh
+bash Miniforge3-Linux-x86_64.sh
+```
+2. 如果没有 `mamba` 命令，但是安装过 conda 环境，可以将 `mamba`命令替换为 `conda`命令进行安装：
+```bash
+conda create -n tomoatt_conda
+conda activate tomoatt_conda
+conda install tomoatt pytomoatt
+```
+但是直接使用 `conda install tomoatt pytomoatt` 进行安装，等待时间可能会比较长。
+3. 如果没有 `mamba` 命令，但是安装过 conda 环境，还可以直接使用 `conda` 安装 `mamba`：
+```bash
+conda install -c conda-forge mamba
+```
+然后就可以使用 `mamba` 命令了
 
 安装完成之后，测试 TomoATT 的安装情况：
 
@@ -77,6 +95,8 @@ TOMOATT
 usage: mpirun -np 4 TOMOATT -i input_params.yaml
 Error: input parameter file not found
 ```
+
+更多种的安装方式，例如下载源码安装等，可以参考官方文档: [https://www.tomoatt.com/docs/GetStarted/Installation/Conda_Installation](https://www.tomoatt.com/docs/GetStarted/Installation/Conda_Installation)
 
 测试 PyTomoATT 的安装情况：
 
@@ -119,7 +139,7 @@ cd ..
 
 涉及脚本与数据文件：
 
-- `DataProc1_删除研究区域外的数据.ipynb`
+- `DataProc1_remove_data_outside_study_region.ipynb`
 - `traveltime_data/src_rec_Turkey.dat`
 
 该脚本用于确定研究区域，并删除研究区域之外的地震与台站。根据需要，研究区域可以进行旋转。输出文件包括：
@@ -133,7 +153,7 @@ cd ..
 
 涉及脚本与数据文件：
 
-- `DataProc2_使用线性回归保留可靠数据.ipynb`
+- `DataProc2_keep_reliable_data_by_linear_regression.ipynb`
 - `output_data/step1_src_rec_indom.dat`
 
 该脚本绘制震源距-首达走时散点图，并使用线性回归的方式删除误差较大的走时数据。输出文件包括：
@@ -144,7 +164,7 @@ cd ..
 
 涉及脚本与数据文件：
 
-- `DataProc3_删除少于指定数量数据的地震.ipynb`
+- `DataProc3_remove_events_with_few_arrivals.ipynb`
 - `output_data/step2_src_rec_remove_outlier.dat`
 
 该脚本可用于删除到时少于特定数量的地震数据。当走时数据较少时，其震源参数难以准确约束，因此可删除。输出文件包括：
@@ -157,7 +177,7 @@ cd ..
 
 涉及脚本与数据文件：
 
-- `DataProc4_生成差分到时.ipynb`
+- `DataProc4_generate_differential_arrival_times.ipynb`
 - `output_data/step3_src_rec_filtered.dat`
 
 该脚本可以基于绝对到时数据，按照一定的筛选原则生成共源差分到时数据或共台差分到时数据。输出文件包括：
@@ -172,7 +192,7 @@ cd ..
 
 涉及脚本与数据文件：
 
-- `DataProc5_可选_设置数据权重.ipynb`
+- `DataProc5_optional_set_data_weights.ipynb`
 - `output_data/step4_src_rec_cs.dat`
 
 该脚本可用于给地震与台站赋予权重，在数据分布不均匀的情况下，提升反演收敛速度，缩短收敛所需迭代次数。输出文件包括：
@@ -205,7 +225,7 @@ cd Step2_Initial_Model
 
 涉及脚本：
 
-- `ModelProc1_生成初始一维模型.ipynb`
+- `ModelProc1_generate_initial_1d_model.ipynb`
 
 该脚本会读取 TomoATT 参数文件 `../3_input_params/input_params_step1_1D_inv.yaml` 中的正演网格参数，并基于 Crust 1.0 模型生成一维模型。每个深度的速度取当前研究区域中 Crust 1.0 模型的平均速度。
 
@@ -256,7 +276,7 @@ cd ..
 在命令行中使用以下命令，通过 TomoATT 进行一维速度模型反演：
 
 ```bash
-bash Step3_bash_一维模型反演.sh
+bash Step3_bash_1d_model_inversion.sh
 ```
 
 该反演使用以下文件：
@@ -278,7 +298,10 @@ mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step1_1D_inv.y
 
 输出的模型文件也备份了一份到 `2_models/model_1d_after_1d_inv.h5`。
 
-可使用 `Plot1_画一维模型反演结果.ipynb` 画图展示反演前后的一维模型。图片输出到 `figs/model_inv_1d.png`。
+可使用 `Plot1_plot_1d_model_inversion_results.ipynb` 画图展示反演前后的一维模型、目标函数下降曲线、和走时残差分布。图片输出到 
+- 一维模型：`figs/Step3_id_model_inv.png`
+- 目标函数下降曲线：`figs/Step3_objective_function_reduction.png`
+- 走时残差分布：`Step3_residual.png`
 
 ### 第四步：开展检测板测试
 
@@ -292,7 +315,7 @@ mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step1_1D_inv.y
 cd Step4_ckb_model
 ```
 
-使用 `ModelProc2_生成检测板模型.ipynb`，基于反演得到的一维模型文件 `OUTPUT_FILES/OUTPUT_FILES_step1_1D_inv/final_model.h5` 添加高低速异常以及各向异性异常，构建检测板模型。
+使用 `ModelProc2_generate_checkerboard_model.ipynb`，基于反演得到的一维模型文件 `OUTPUT_FILES/OUTPUT_FILES_step1_1D_inv/final_model.h5` 添加高低速异常以及各向异性异常，构建检测板模型。
 
 这里速度异常的尺寸是 1° × 1° × 10 km，各向异性异常是 1.5° × 1.5° × 10 km。对应参数文件中的反演网格尺寸设置为 0.5° × 0.5° × 5 km（速度）和 0.75° × 0.75° × 5 km（各向异性）。
 
@@ -317,7 +340,7 @@ cd ..
 在命令行中使用以下命令，执行检测板测试：
 
 ```bash
-bash Step4_bash_检测板测试.sh
+bash Step4_bash_checkerboard_test.sh
 ```
 
 检测板测试包括三项步骤：
@@ -375,7 +398,7 @@ mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_ckb_inv.yaml
 
 为了进行验证，80 次迭代模型打包在目录 `PATH/CHS/benchmark_dataset/OUTPUT_FILES_ckb_inv_80iter/final_model.h5` 中。
 
-可使用 `Plot2_画检测板测试结果.ipynb` 画图展示检测板测试结果。
+可使用 `Plot2_plot_checkerboard_test_results.ipynb` 画图展示检测板测试结果。图片存储路径为 `figs/Step4_ckb_inv.png`。
 
 ### 第五步：真实数据反演
 
@@ -384,7 +407,7 @@ mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_ckb_inv.yaml
 在命令行中使用以下命令，执行真实数据成像：
 
 ```bash
-bash Step5_bash_真实数据成像.sh
+bash Step5_bash_real_data_inversion.sh
 ```
 
 真实数据成像包括两项步骤：
@@ -437,7 +460,7 @@ mpirun -n ${Nproc} ${TomoATT_path} -i 3_input_params/input_params_step3_inv_relo
 
 为了进行验证，100 次迭代模型打包在目录 `PATH/CHS/benchmark_dataset/OUTPUT_FILES_step3_inv_reloc_100iter/final_model.h5` 中。
 
-可使用 `Plot3_真实数据反演结果.ipynb` 画图展示真实数据层析成像结果。
+可使用 `Plot3_plot_real_data_inversion_results.ipynb` 画图展示真实数据层析成像结果。图片存储路径为 `figs/Step5_real_inv.png`。
 
 注释：
 1. TomoATT 使用迭代法更新参数：在第 `k` 步迭代结果中，计算目标函数关于速度结构、各向异性、震源位置与发震时刻的梯度，同时更新以上参数，得到第 `k + 1` 步迭代结果。总计进行 100 次迭代。
