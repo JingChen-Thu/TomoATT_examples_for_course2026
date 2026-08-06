@@ -123,15 +123,6 @@ cd Step1_Data_Process
 
 具体步骤包括：
 
-#### 预备工作：解压数据文件
-
-解压 `traveltime_data/src_rec_Turkey.tar.gz` 压缩文件，获得原始走时数据文件 `traveltime_data/src_rec_Turkey.dat`：
-
-```bash
-cd traveltime_data
-tar -xf src_rec_Turkey.tar.gz
-cd ..
-```
 
 该数据文件 `traveltime_data/src_rec_Turkey.dat` 符合 TomoATT 数据文件格式。接下来，将对其中的数据进行筛选，以用于后续成像。
 
@@ -140,7 +131,7 @@ cd ..
 涉及脚本与数据文件：
 
 - `DataProc1_remove_data_outside_study_region.ipynb`
-- `traveltime_data/src_rec_Turkey.dat`
+- `traveltime_data/src_rec_Turkey.tar.gz`
 
 该脚本用于确定研究区域，并删除研究区域之外的地震与台站。根据需要，研究区域可以进行旋转。输出文件包括：
 
