@@ -102,7 +102,7 @@ ignore_velocity_discontinuity: false # An error will be reported if false but th
 ###################################################
 model_update:
   max_iterations: 10 # maximum number of inversion iterations
-  optim_method: 0 # optimization method. 0 : grad_descent, 1 : lbfgs; default: 0
+  optim_method: 1 # optimization method. 0 : grad_descent, 1 : lbfgs; default: 0
   line_search_mode: true # if true, use line search to determine step length, otherwise, use controlled step size. default: false
 
   #common parameters for all optim methods

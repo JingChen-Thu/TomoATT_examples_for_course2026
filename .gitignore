@@ -58,3 +58,5 @@ CHS/utils/__pycache__
 CHS/bin/*
 CHS/params_log.yaml
 CHS/time.txt
+
+CHS/old
